@@ -440,4 +440,4 @@ const styles = StyleSheet.create({
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 5
+    marginTop: 5,
