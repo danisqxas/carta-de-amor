@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 5, // Añadida la coma
+    marginTop: 5
   },
   paginationDot: {
     width: 10,
