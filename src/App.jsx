@@ -14,14 +14,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
-
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.9;
-
 export default function HomeScreen() {
   const [activeCard, setActiveCard] = useState(0);
   const scrollX = new Animated.Value(0);
-
   const cards = [
     {
       id: 1,
@@ -54,13 +51,11 @@ export default function HomeScreen() {
       amenities: ['WiFi', 'Gym', 'Restaurant', 'Concierge']
     },
   ];
-
   const getInputRange = (index) => [
     (index - 1) * CARD_WIDTH,
     index * CARD_WIDTH,
     (index + 1) * CARD_WIDTH
   ];
-
   const renderCard = (card, index) => {
     const inputRange = getInputRange(index);
     
@@ -75,7 +70,6 @@ export default function HomeScreen() {
       outputRange: [0.6, 1, 0.6],
       extrapolate: 'clamp',
     });
-
     return (
       <TouchableOpacity 
         key={card.id}
@@ -144,7 +138,6 @@ export default function HomeScreen() {
       </TouchableOpacity>
     );
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -210,7 +203,6 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -440,4 +432,16 @@ const styles = StyleSheet.create({
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-     marginTop: 5,
+    marginTop: 5, // Añadida la coma
+  },
+  paginationDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 5,
+  },
+  paginationDotActive: {
+    backgroundColor: '#FF385C',
+  }
+});
