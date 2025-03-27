@@ -436,11 +436,15 @@ const styles = StyleSheet.create({
   bookButtonText: {
     color: 'white',
     fontWeight: 'bold',
+},
+  bookButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 5,
+    marginTop: 5 // Quité la coma
   },
   paginationDot: {
     width: 10,
@@ -450,6 +454,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   paginationDotActive: {
-    backgroundColor: '#FF385C',
+    backgroundColor: '#FF385C'  // Quité la coma del último objeto
   }
 });
