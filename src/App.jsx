@@ -1,98 +1,98 @@
-import React, { useState, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  Image, 
-  TouchableOpacity, 
-  Dimensions, 
-  Animated,
-  StatusBar,
-  ImageBackground
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import React, { useRef, useState, useMemo } from "react";
+import { View, Text, FlatList, Image, Animated, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = width * 0.9;
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.8;
+const SPACING = 20;
+const ITEM_WIDTH = CARD_WIDTH + SPACING * 2;
 
-export default function HomeScreen() {
-  const [activeCard, setActiveCard] = useState(0);
+const cards = [
+  { id: 1, title: "Card 1", image: "https://via.placeholder.com/150" },
+  { id: 2, title: "Card 2", image: "https://via.placeholder.com/150" },
+  { id: 3, title: "Card 3", image: "https://via.placeholder.com/150" },
+];
+
+const Carousel = () => {
   const scrollX = useRef(new Animated.Value(0)).current;
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const cards = [
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
     {
-      id: 1,
-      title: 'Mountain Retreat',
-      description: 'Experience the breathtaking views at our exclusive mountain resort.',
-      image: 'https://api.a0.dev/assets/image?text=mountain%20retreat%20luxury%20resort%20with%20snow%20capped%20peaks&aspect=16:9',
-      rating: 4.9,
-      price: '$299',
-      location: 'Swiss Alps',
-      amenities: ['WiFi', 'Pool', 'Spa', 'Restaurant']
-    },
-    {
-      id: 2,
-      title: 'Beach Paradise',
-      description: 'Relax and unwind at our beachfront villa with crystal clear waters.',
-      image: 'https://api.a0.dev/assets/image?text=luxury%20beach%20resort%20with%20clear%20turquoise%20water&aspect=16:9',
-      rating: 4.8,
-      price: '$349',
-      location: 'Maldives',
-      amenities: ['WiFi', 'Pool', 'Bar', 'Water Sports']
-    },
-    {
-      id: 3,
-      title: 'Urban Getaway',
-      description: 'Stay in the heart of the city with access to shopping and nightlife.',
-      image: 'https://api.a0.dev/assets/image?text=modern%20city%20hotel%20with%20skyline%20view%20at%20night&aspect=16:9',
-      rating: 4.7,
-      price: '$249',
-      location: 'New York',
-      amenities: ['WiFi', 'Gym', 'Restaurant', 'Concierge']
-    },
-  ];
+      useNativeDriver: false,
+      listener: (event) => {
+        const offsetX = event.nativeEvent.contentOffset.x;
+        setCurrentIndex(Math.round(offsetX / CARD_WIDTH));
+      }
+    }
+  );
 
-  const getInputRange = (index) => [
-    (index - 1) * CARD_WIDTH,
-    index * CARD_WIDTH,
-    (index + 1) * CARD_WIDTH
-  ];
+  const inputRanges = useMemo(() =>
+    cards.map((_, index) => [(index - 1) * ITEM_WIDTH, index * ITEM_WIDTH, (index + 1) * ITEM_WIDTH]),
+    [cards]
+  );
 
-  const renderCard = (card, index) => {
-    const inputRange = getInputRange(index);
-    
-    const scale = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.9, 1, 0.9],
-      extrapolate: 'clamp',
-    });
-    
-    const opacity = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.6, 1, 0.6],
-      extrapolate: 'clamp',
-    });
+  const handleBookPress = () => {
+    console.log("Booking now...");
+  };
 
-    return (
-      <TouchableOpacity 
-        key={card.id}
-        activeOpacity={0.9}
-        onPress={() => console.log(`Selected ${card.title}`)}
-      >
-        <Animated.View style={[
-          styles.card,
-          {
-            transform: [{ scale }],
-            opacity,
-          }
-        ]}>
-          <ImageBackground 
-            source={{ uri: card.image }} 
-            style={styles.cardImage}
-            imageStyle={{ borderTopLeftRadius: 16, borderTopRightRadius: 16 }}
+  return (
+    <View style={styles.container}>
+      <Animated.FlatList
+        data={cards}
+        keyExtractor={(item) => item.id.toString()}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: SPACING }}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        renderItem={({ item, index }) => {
+          const scale = scrollX.interpolate({
+            inputRange: inputRanges[index],
+            outputRange: [0.8, 1, 0.8],
+            extrapolate: "clamp"
+          });
+
+          return (
+            <View style={{ width: ITEM_WIDTH }}>
+              <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
+                <Image source={{ uri: item.image }} style={styles.image} />
+                <Text style={styles.title}>{item.title}</Text>
+                <TouchableOpacity style={styles.bookButton} onPress={handleBookPress} activeOpacity={0.8}>
+                  <Text style={styles.bookButtonText}>Book Now</Text>
+                </TouchableOpacity>
+              </Animated.View>
+            </View>
+          );
+        }}
+      />
+      <View style={styles.paginationContainer}>
+        {cards.map((_, index) => (
+          <View
+            key={index}
+            style={[styles.paginationDot, index === currentIndex && styles.paginationDotActive]}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: "center", alignItems: "center" },
+  card: { width: CARD_WIDTH, height: 200, backgroundColor: "#fff", borderRadius: 10, alignItems: "center", padding: 20, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 },
+  image: { width: "100%", height: 120, borderRadius: 10 },
+  title: { fontSize: 18, fontWeight: "bold", marginTop: 10 },
+  bookButton: { marginTop: 10, backgroundColor: "blue", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 5 },
+  bookButtonText: { color: "#fff", fontSize: 16 },
+  paginationContainer: { flexDirection: "row", position: "absolute", bottom: 20 },
+  paginationDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "gray", marginHorizontal: 5 },
+  paginationDotActive: { backgroundColor: "blue" }
+});
+
+export default Carousel;
+
           >
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.7)']}
