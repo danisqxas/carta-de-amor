@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useCallback } from "react";
 import { View, Text, FlatList, Image, Animated, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -22,7 +22,10 @@ const Carousel = () => {
       useNativeDriver: false,
       listener: (event) => {
         const offsetX = event.nativeEvent.contentOffset.x;
-        setCurrentIndex(Math.round(offsetX / CARD_WIDTH));
+        const newIndex = Math.round(offsetX / CARD_WIDTH);
+        if (newIndex !== currentIndex) {
+          setCurrentIndex(newIndex);
+        }
       }
     }
   );
@@ -49,7 +52,7 @@ const Carousel = () => {
         scrollEventThrottle={16}
         renderItem={({ item, index }) => {
           const scale = scrollX.interpolate({
-            inputRange: inputRanges[index],
+            inputRange: inputRanges[index] || [0, 0, 0],
             outputRange: [0.8, 1, 0.8],
             extrapolate: "clamp"
           });
@@ -59,7 +62,12 @@ const Carousel = () => {
               <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
                 <Image source={{ uri: item.image }} style={styles.image} />
                 <Text style={styles.title}>{item.title}</Text>
-                <TouchableOpacity style={styles.bookButton} onPress={handleBookPress} activeOpacity={0.8}>
+                <TouchableOpacity 
+                  style={styles.bookButton} 
+                  onPress={handleBookPress} 
+                  activeOpacity={0.7} 
+                  accessibilityRole="button"
+                >
                   <Text style={styles.bookButtonText}>Book Now</Text>
                 </TouchableOpacity>
               </Animated.View>
@@ -93,13 +101,6 @@ const styles = StyleSheet.create({
 
 export default Carousel;
 
-          >
-            <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.7)']}
-              style={styles.gradient}
-            >
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTag}>
                   <Text style={styles.cardTagText}>Featured</Text>
                 </View>
                 <TouchableOpacity style={styles.favoriteButton}>
