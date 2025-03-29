@@ -73,72 +73,6 @@ const DestinationCarousel = () => {
     [cards]
   );
 
-  const renderCard = (card, index) => {
-    const scale = scrollX.interpolate({
-      inputRange: inputRanges[index],
-      outputRange: [0.8, 1, 0.8],
-      extrapolate: "clamp"
-    });
-
-    return (
-      <TouchableOpacity key={card.id} activeOpacity={0.8}>
-        <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
-          <ImageBackground 
-            source={{ uri: card.image }} 
-            style={styles.cardImage}
-            imageStyle={{ borderTopLeftRadius: 16, borderTopRightRadius: 16 }}
-          >
-            <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.7)']}
-              style={styles.gradient}
-            >
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTag}>
-                  <Text style={styles.cardTagText}>Featured</Text>
-                </View>
-                <TouchableOpacity style={styles.favoriteButton}>
-                  <MaterialIcons name="favorite-border" size={24} color="white" />
-                </TouchableOpacity>
-              </View>
-            </LinearGradient>
-          </ImageBackground>
-          
-          <View style={styles.cardContent}>
-            <View style={styles.cardTitleRow}>
-              <Text style={styles.cardTitle}>{card.title}</Text>
-              <View style={styles.ratingContainer}>
-                <MaterialIcons name="star" size={16} color="#FFD700" />
-                <Text style={styles.ratingText}>{card.rating}</Text>
-              </View>
-            </View>
-            
-            <View style={styles.locationRow}>
-              <Ionicons name="location-sharp" size={16} color="#FF385C" />
-              <Text style={styles.locationText}>{card.location}</Text>
-            </View>
-            
-            <Text style={styles.cardDescription}>{card.description}</Text>
-            
-            <View style={styles.amenitiesContainer}>
-              {card.amenities.map((amenity, idx) => (
-                <View key={idx} style={styles.amenityTag}>
-                  <Text style={styles.amenityText}>{amenity}</Text>
-                </View>
-              ))}
-            </View>
-            
-            <View style={styles.cardFooter}>
-              <Text style={styles.priceText}>{card.price}<Text style={styles.perNight}> / night</Text></Text>
-              <TouchableOpacity style={styles.bookButton}>
-                <Text style={styles.bookButtonText}>Book Now</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Animated.View>
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -147,29 +81,6 @@ const DestinationCarousel = () => {
         <TouchableOpacity style={styles.profileButton}>
           <FontAwesome5 name="user-circle" size={24} color="#333" />
         </TouchableOpacity>
-      </View>
-      
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#777" style={styles.searchIcon} />
-          <Text style={styles.searchPlaceholder}>Search destinations</Text>
-        </View>
-        <TouchableOpacity style={styles.filterButton}>
-          <Ionicons name="options-outline" size={20} color="#fff" />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.categoriesContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
-          {['All', 'Popular', 'Recommended', 'Trending', 'Luxury'].map((category, index) => (
-            <TouchableOpacity 
-              key={index} 
-              style={[styles.categoryButton, index === 0 && styles.activeCategoryButton]}
-            >
-              <Text style={[styles.categoryText, index === 0 && styles.activeCategoryText]}>{category}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
       </View>
       
       <Text style={styles.sectionTitle}>Featured Destinations</Text>
@@ -181,22 +92,34 @@ const DestinationCarousel = () => {
         snapToInterval={CARD_WIDTH}
         decelerationRate="fast"
         contentContainerStyle={styles.scrollContent}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
-        )}
+        onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        {cards.map((card, index) => renderCard(card, index))}
+        {cards.map((card, index) => {
+          const scale = scrollX.interpolate({
+            inputRange: inputRanges[index] || [0, 0, 0],
+            outputRange: [0.8, 1, 0.8],
+            extrapolate: "clamp"
+          });
+          return (
+            <TouchableOpacity key={card.id} activeOpacity={0.8}>
+              <Animated.View style={[styles.card, { transform: [{ scale }] }]}> 
+                <Image source={{ uri: card.image }} style={styles.cardImage} />
+                <Text style={styles.cardTitle}>{card.title}</Text>
+                <Text style={styles.priceText}>{card.price} <Text style={styles.perNight}>/ night</Text></Text>
+              </Animated.View>
+            </TouchableOpacity>
+          );
+        })}
       </Animated.ScrollView>
-      
+
       <View style={styles.paginationContainer}>
         {cards.map((_, index) => (
           <View
             key={index}
             style={[
               styles.paginationDot,
-              Math.floor(scrollX._value / CARD_WIDTH + 0.5) === index && styles.paginationDotActive
+              index === currentIndex && styles.paginationDotActive
             ]}
           />
         ))}
@@ -210,7 +133,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  // (resto de los estilos son los mismos que proporcionaste)
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
